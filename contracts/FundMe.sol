@@ -7,7 +7,7 @@ import {PriceConverter} from "./PriceConverter.sol";
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint256 public minimumUsd = 5;
+    uint256 public minimumUsd = 5e18;
 
     address[] public funders;
     mapping(address => uint256) public addressToAmmountFunded;
@@ -23,7 +23,7 @@ contract FundMe {
         addressToAmmountFunded[msg.sender] += msg.value;
     }
 
-    function withdraw() public {
+    function withdraw() public onlyOwner {
         for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
             address funder = funders[funderIndex];
             addressToAmmountFunded[funder] = 0;
@@ -33,5 +33,10 @@ contract FundMe {
 
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Sender not owner");
+        _;
     }
 }
