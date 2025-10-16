@@ -18,30 +18,20 @@ contract FundMe {
     }
 
     function fund() public payable {
-        require(
-            msg.value.getConversionRate() > minimumUsd,
-            "didn't send enoug eth"
-        );
+        require(msg.value.getConversionRate() > minimumUsd, "didn't send enoug eth");
         funders.push(msg.sender);
         addressToAmmountFunded[msg.sender] += msg.value;
     }
 
     function withdraw() public {
-        require(msg.sender == owner, "Must be owner");
-        for (
-            uint256 funderIndex = 0;
-            funderIndex < funders.length;
-            funderIndex++
-        ) {
+        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
             address funder = funders[funderIndex];
             addressToAmmountFunded[funder] = 0;
         }
 
         funders = new address[](0);
 
-        (bool callSuccess, ) = payable(msg.sender).call{
-            value: address(this).balance
-        }("");
+        (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
     }
 }
